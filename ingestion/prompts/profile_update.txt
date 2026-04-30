@@ -1,0 +1,127 @@
+You are updating a user profile — a short list of stable, long-term facts. The profile should ONLY contain timeless identity facts, NOT events or temporary states.
+
+EXISTING PROFILE (each line is numbered for reference):
+{existing_profile}
+
+NEW FACTS:
+{new_facts}
+
+The profile has TWO sections:
+
+## EXPLICIT FACTS
+Things the user directly stated about themselves:
+- Name, age, gender, origin, nationality
+- Career, job title, education
+- Long-term goals and aspirations
+- Stable preferences (favorite food, books, music, color)
+- Relationships (family, friends, partners — who they are, not what they did)
+- Skills, expertise, certifications
+- Long-term interests and established hobbies
+- Recurring routines and habits (confirmed patterns, not one-off actions)
+- Meaningful possessions (sentimental items, pets with names)
+
+## IMPLICIT TRAITS
+Personality traits inferred from the user's behavior. Each trait MUST:
+- Be supported by at least 2 different facts or repeated behavior
+- Use [Tag] format: e.g., [Health-Conscious], [Detail-Oriented], [Family-Oriented]
+- Include a brief justification
+
+Examples:
+- [Health-Conscious] — maintains a 6-day gym routine, tracks diet
+- [Detail-Oriented] — remembers specific brands, prices, delivery times
+- [Family-Oriented] — plans around family events, buys gifts for mother
+
+WHAT DOES NOT GO INTO THE PROFILE:
+- Facts about the AI assistant (Ira) — this profile is ONLY about the user
+- One-time events ("attended parade on June 15") → stays in rolling summary
+- Temporary states ("feeling nervous about interview") → stays in rolling summary
+- One-off actions ("ate biryani today") → stays in rolling summary
+- Opinions and beliefs → only if very distinctive and personal
+- Specific activity details ("made a cup with dog face") → stays in rolling summary
+- Short-term plans → handled by foresight
+
+FORMAT:
+- Each fact is ONE bullet point, one line, under 30 words
+- Use "- " prefix for each explicit fact
+- Use "- [Tag] — justification" for implicit traits
+- Maximum ~50 explicit facts + ~10 implicit traits
+- No categories, no dates, no paragraphs
+
+YOUR TASK:
+Analyze the NEW FACTS and decide what operations to perform on the existing profile. Available operations:
+
+- **add**: New stable fact not already in profile (specify section: "explicit" or "implicit")
+- **update**: Existing fact needs correction or refinement (specify by line number)
+- **delete**: Existing fact should be removed (specify by line number + reason)
+- **none**: No operations needed (new facts contain nothing profile-worthy)
+
+OPERATION GUIDE:
+- **add**: Completely new user information unrelated to existing items
+- **update**: Existing item has updates, supplements, or corrections. Include the FULL updated line.
+- **delete**: Should delete in these cases:
+  - User explicitly negates (e.g., "I'm no longer vegetarian")
+  - Information is outdated or directly contradicted by new facts
+  - Fact is too trivial or was added by mistake
+  - Redundant with another fact
+
+CONFLICT RULES — be very strict:
+- A conflict is ONLY when two facts are genuinely mutually exclusive (e.g., "lives in Bangalore" vs "lives in Hyderabad")
+- Adding more detail is NOT a conflict (e.g., "wants to study abroad" → "applying to TU Munich" is a refinement — use update)
+- Uncertainty is NOT a conflict (e.g., "plans to do MS" + "undecided about MS" — just update the fact)
+- NEVER fabricate or infer a new_value — both old_value and new_value MUST come directly from the existing profile or new facts
+
+EXAMPLES:
+
+Example 1 — Mixed operations:
+{
+  "operations": [
+    {"action": "add", "section": "explicit", "fact": "- Amit enjoys indie rock, especially Tame Impala"},
+    {"action": "update", "line": 3, "old_fact": "- Amit plans to study abroad", "new_fact": "- Amit is applying to TU Munich and KTH for MS in Computer Science"},
+    {"action": "delete", "line": 7, "old_fact": "- Amit is undecided about career path", "reason": "resolved — decided to pursue graduate studies"},
+    {"action": "add", "section": "implicit", "fact": "- [Music-Enthusiast] — listens to indie rock daily, attends concerts regularly"}
+  ],
+  "conflicts": [
+    {"category": "personal_info", "old_value": "lives in Bangalore", "new_value": "moved to Hyderabad last month"}
+  ]
+}
+
+Example 2 — No changes needed:
+{
+  "operations": [
+    {"action": "none"}
+  ],
+  "conflicts": []
+}
+
+Example 3 — Only additions:
+{
+  "operations": [
+    {"action": "add", "section": "explicit", "fact": "- Priya has a pet cat named Mochi"},
+    {"action": "add", "section": "explicit", "fact": "- Priya's younger brother is named Arjun"}
+  ],
+  "conflicts": []
+}
+
+Example 4 — Delete outdated + add replacement:
+{
+  "operations": [
+    {"action": "delete", "line": 5, "old_fact": "- Priya works as an intern at a consulting firm", "reason": "no longer accurate — got a full-time offer"},
+    {"action": "add", "section": "explicit", "fact": "- Priya works as a data analyst at a fintech startup"}
+  ],
+  "conflicts": [
+    {"category": "work_life", "old_value": "works as an intern at a consulting firm", "new_value": "works as a data analyst at a fintech startup"}
+  ]
+}
+
+Output as JSON:
+{
+  "operations": [
+    {"action": "add|update|delete|none", ...}
+  ],
+  "conflicts": [
+    {"category": "category_name", "old_value": "old contradicted fact", "new_value": "new fact that replaces it"}
+  ]
+}
+
+If no conflicts were detected, return an empty conflicts array.
+Return ONLY the JSON, no extra text.

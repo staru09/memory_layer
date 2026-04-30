@@ -1,0 +1,133 @@
+You are a memory extraction specialist. Given a conversation, extract all important information as consolidated facts and foresight signals.
+
+{prior_context_block}
+
+EXTRACTION RULES:
+- Extract EVERY piece of meaningful information — names, places, dates, preferences, plans, opinions, relationships, activities.
+- Each fact should be a dense, self-contained sentence that captures the full context of an event or detail.
+- CONSOLIDATE closely related details about the SAME event into one fact, but do NOT merge DIFFERENT events together.
+  GOOD: "Amit ordered pasta via Zomato at 1 PM on June 12, which arrived cold after an hour."
+  BAD: Merging a food order with a gym visit into one fact just because they happened the same day.
+- Each fact should be a self-contained sentence with enough context to be understood on its own.
+- When in doubt, keep facts SEPARATE rather than over-consolidating. A missed detail cannot be recovered, but redundancy is harmless.
+- Include ALL specific names, dates, quantities, and details.
+- Convert relative dates to absolute: "4 years ago" from 2025 = "in 2021", "yesterday" from June 15 = "on June 14, 2025".
+- ALWAYS use absolute dates in facts, never relative ("4 days ago", "last week", "yesterday"). Relative time goes stale.
+- NEVER infer beyond what is explicitly stated.
+- NEVER infer residence from visiting a place.
+- NEVER escalate frequency — mentioning something once does NOT make it a habit.
+- Extract WHAT HAPPENED, not the user's memory of it. If user says "I don't remember planning X" but they didn't do X, the fact is "User did not do X" — not "User doesn't remember X".
+- Facts should be objective statements, not editorial commentary. BAD: "User does not remember his plan." GOOD: "Amit did not travel to Pune on June 10."
+- When a prior plan is contradicted by current reality, extract the current state. BAD: "User forgot about the trip." GOOD: "Amit is still in Mumbai as of June 12 and did not take the bus to Pune on June 10."
+- COREFERENCE RESOLUTION: When pronouns like "wo", "they", "it", "that" are used, resolve them to the correct entity using conversation context.
+
+ATTRIBUTION RULES:
+- Every fact MUST contain the person's actual name (e.g., "Amit ordered..." not "the user ordered...")
+- Resolve ALL pronouns to specific names: "he went" → "Amit went"
+- If the user's name is unknown, use "User" consistently — never "the person", "they", or "someone"
+- Once a name is established in conversation, always use it in all subsequent facts
+
+SPEAKER RULES:
+- Extract facts about ALL speakers in the conversation.
+- If one speaker is an AI assistant, do NOT extract the assistant's opinions or identity — only extract what the user said/did.
+- If both speakers are humans (e.g., two friends chatting), extract facts about BOTH of them.
+
+DO NOT EXTRACT:
+- Greetings and farewells ("hi", "bye", "good night", "take care")
+- Social pleasantries ("how are you", "I'm fine", "nice talking to you")
+- Acknowledgments without content ("okay", "sure", "hmm", "haha", "accha")
+- The AI assistant's responses, opinions, or identity facts
+- Repetitions of already-stated facts within the same conversation
+- Conversation mechanics ("let me tell you", "as I was saying", "you know what")
+- Vague emotional states without context ("I'm happy", "feeling good") — only extract if tied to a specific cause
+
+VERBATIM DETAILS — these are HIGH PRIORITY and must NEVER be skipped:
+- Signs, posters, banners: extract the EXACT text written on them in quotes.
+- Paintings, drawings, creative works: extract the specific subject, colors, and style (e.g., "a sunset with orange sky" not just "a painting").
+- Physical objects (gifts, bowls, cups, crafts): extract what it looks like, what shape, what's on it, and what it means to the person.
+- Pet/animal details: extract the pet's NAME, species, breed, and specific behaviors or actions.
+- Book titles, song names, event names: always include the FULL TITLE in quotes. If someone says "I read a great book about X", and the title is mentioned anywhere in the conversation, include it.
+- Reactions to events: extract how someone felt (e.g., "felt scared", "was happy and thankful").
+- Advice given: extract the specific steps or recommendations, not just "gave advice".
+- What someone saw or experienced at an event: extract what they observed, not just that they attended.
+- Recipes and cooking: extract the specific dish name, ingredients mentioned, and who cooked it.
+- Team names, player names, band names, brand names: extract the EXACT name as stated.
+- Hair changes, appearance changes, style changes: extract what changed and to what (e.g., "dyed hair purple").
+
+FREQUENCY & PATTERN TRACKING:
+- Record recurring activities and their frequency: "Amit goes to the gym 6 days a week" not just "Amit goes to the gym".
+- Note habitual actions with specifics: "Priya usually has green tea at 8 AM before work" not just "Priya drinks tea".
+- Track time-specific routines: "Amit calls his mother every Sunday evening" not just "Amit talks to his mother".
+- If someone mentions doing something repeatedly ("I always", "every week", "usually"), capture the frequency explicitly.
+- If a pattern emerges across the conversation (e.g., mentions gym on Monday and again on Thursday), consolidate into one frequency fact: "Amit works out on Mondays and Thursdays".
+
+WHAT TO PRIORITIZE:
+- EVERY event, activity, trip, visit, class, race, workshop, meeting — extract each one as its own fact with the date.
+- Specific details (objects, descriptions, counts, names, what was seen/heard) over general opinions or beliefs.
+- Actions and events over feelings about those events.
+- If someone says "I feel X about Y", extract BOTH X and Y as facts.
+- Skip generic sentiments like "life is a journey" or "family is important" — only extract opinions that are specific and personal.
+- When in doubt, EXTRACT IT. More facts is better than fewer. A missed detail cannot be recovered later.
+- Extract MORE rather than LESS. 5-15 facts per conversation is normal. If you only have 1-2, you are likely missing details.
+
+CATEGORY ASSIGNMENT:
+Assign each fact to ONE category:
+- personal_info: Name, age, gender, nationality, origin, identity
+- preferences: Likes, dislikes, favorites (food, books, music, etc.)
+- relationships: Family, friends, partners, social connections
+- activities: Hobbies, sports, creative pursuits, regular activities
+- goals: Future plans, aspirations, deadlines, intentions
+- experiences: Past events, trips, milestones, achievements
+- knowledge: Skills, expertise, education, certifications
+- opinions: Views, beliefs, attitudes, reactions
+- habits: Routines, patterns, lifestyle choices, health
+- work_life: Career, job, professional development, workplace
+
+FORESIGHT SIGNALS:
+Extract forward-looking or time-bounded information:
+- Temporary illness: ~1-2 weeks
+- Travel plans: specific dates
+- Deliveries: precise ETA with time
+- New job/move: indefinite (valid_until = null, duration_days = null)
+- Deadlines: valid until the deadline date
+If no foresight signals exist, return an empty array.
+Each foresight MUST include:
+- "evidence": the specific user statement that triggered this prediction
+- "duration_days": integer number of days this foresight is expected to last (null if indefinite)
+
+TIME-SPECIFIC FORESIGHT:
+- When the user mentions a specific time or duration (e.g., "40 min me aa jayega", "7 AM flight", "2 PM meeting"), include the TIME in valid_from and valid_until.
+- Use format "YYYY-MM-DD HH:MM" when time is known, "YYYY-MM-DD" when only date is known.
+- For deliveries/arrivals: valid_from = time of ordering, valid_until = expected arrival time.
+- Compute valid_until from the conversation timestamp + mentioned duration.
+
+Foresight examples:
+- User says at 12:26 PM "ordered paneer chawal from Swiggy, 40 min me aa jayega":
+  {"description": "Paneer chawal order from Swiggy arriving", "valid_from": "2025-06-15 12:26", "valid_until": "2025-06-15 13:06", "evidence": "Ordered paneer chawal from Swiggy, 40 min delivery estimate", "duration_days": 1}
+- User says at 12:27 PM "10 min me blinkit se dahi bhi aajaegi":
+  {"description": "Dahi order from Blinkit arriving", "valid_from": "2025-06-15 12:27", "valid_until": "2025-06-15 12:37", "evidence": "Ordered dahi via Blinkit, 10 min delivery estimate", "duration_days": 1}
+- User says "I have a 7 AM flight to Delhi on Friday":
+  {"description": "Flight to Delhi at 7 AM", "valid_from": "2025-06-20 07:00", "valid_until": "2025-06-20", "evidence": "User said they have a 7 AM flight to Delhi on Friday", "duration_days": 1}
+- User says "Doctor told me to rest and avoid spicy food for a week":
+  {"description": "User should avoid spicy food and rest per doctor's advice", "valid_from": "2025-06-15", "valid_until": "2025-06-22", "evidence": "Doctor advised rest and avoiding spicy food for one week", "duration_days": 7}
+- User says "I just started a new job at a startup":
+  {"description": "User started working at a startup", "valid_from": "2025-06-15", "valid_until": null, "evidence": "User said they just started a new job at a startup", "duration_days": null}
+- User says "My exams start next Monday and end on the 25th":
+  {"description": "User has exams", "valid_from": "2025-06-16", "valid_until": "2025-06-25", "evidence": "User said exams start next Monday and end on the 25th", "duration_days": 10}
+
+**Conversation:**
+{conversation}
+
+**Current date context:** {current_date}
+
+Output as JSON:
+{
+  "facts": [
+    {"text": "fact text here", "category": "category_name", "date": "YYYY-MM-DD"}
+  ],
+  "foresight": [
+    {"description": "foresight description here", "valid_from": "YYYY-MM-DD HH:MM or YYYY-MM-DD", "valid_until": "YYYY-MM-DD HH:MM or YYYY-MM-DD", "evidence": "user's exact statement or paraphrase that triggered this", "duration_days": 7}
+  ]
+}
+
+Return ONLY the JSON, no extra text.

@@ -1,0 +1,14 @@
+.env
+__pycache__
+.venv
+.vscode
+.md
+*.pyc
+*.pdf
+.agent
+tests/
+db_backup/
+prod.env
+benchmark_results/
+benchmark/
+scripts/

@@ -1,0 +1,21 @@
+You are compacting a user profile that has grown too large. Your goal is to merge similar items and remove redundancy — NOT to rewrite from scratch.
+
+CURRENT PROFILE:
+{current_profile}
+
+COMPACTION RULES:
+1. MERGE similar/overlapping facts into single facts:
+   - "Amit plans to study abroad" + "Amit is applying to TU Munich and KTH" → "Amit is applying to TU Munich and KTH for MS in 2027"
+   - "Priya likes indie music" + "Priya listens to Tame Impala" → "Priya enjoys indie music, especially Tame Impala"
+2. REMOVE truly redundant facts (same info stated twice)
+3. KEEP all unique facts intact — do not drop facts just to reduce count
+4. KEEP the two-section format: explicit facts first, then "## IMPLICIT TRAITS" section
+5. Preserve specific details (names, places, brands, relationships) — never generalize them away
+6. Target roughly 70% of the current fact count (merge, don't delete)
+
+Output format:
+- Each fact is one bullet point, "- " prefix
+- Implicit traits use "- [Tag] — justification" format
+- Sections separated by blank line + "## IMPLICIT TRAITS" header
+
+Return ONLY the compacted profile text, no JSON or extra formatting.

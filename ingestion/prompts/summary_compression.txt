@@ -1,0 +1,23 @@
+You are compressing a rolling conversation summary. The summary has two parts:
+- ARCHIVE: compressed older events and recurring themes
+- ENTRIES TO COMPRESS: older recent entries that need to be folded into the archive
+
+EXISTING ARCHIVE:
+{existing_archive}
+
+ENTRIES TO COMPRESS:
+{entries_to_compress}
+
+INSTRUCTIONS:
+1. Produce an updated archive that incorporates the entries to compress.
+2. Recurring facts (mentioned in both archive and entries) should be REINFORCED — keep them prominent.
+3. One-off old events can be condensed but NEVER drop the date.
+4. CRITICAL: NEVER drop or approximate dates. Every event MUST retain its exact date.
+   - BAD: "Person attended events in May and June" (dates lost)
+   - GOOD: "Person went to event A on May 7, event B on May 21, event C the week before June 9"
+5. ALWAYS preserve: exact dates, specific names, places, numbers, book titles, event names.
+6. You may shorten descriptions but NEVER remove the date an event occurred.
+7. Write in third person, past tense.
+8. Use a compact format: "[date] event description" for each distinct event.
+
+Return ONLY the updated archive text, no JSON or formatting.
